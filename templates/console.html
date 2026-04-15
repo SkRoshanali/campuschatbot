@@ -615,6 +615,7 @@
             const TIMEOUT_MS = 20 * 60 * 1000;
             const timerEl = document.getElementById('sessionTimer');
             let deadline = Date.now() + TIMEOUT_MS;
+            let timerStarted = false;
 
             // Fetch initial login_time from server
             fetch('/api/me').then(r => r.json()).then(data => {
@@ -622,9 +623,14 @@
                     const loginTime = new Date(data.login_time + (data.login_time.includes('Z') ? '' : 'Z')).getTime();
                     deadline = loginTime + TIMEOUT_MS;
                 }
-            }).catch(() => {});
+                timerStarted = true;
+            }).catch(() => {
+                timerStarted = true;
+            });
 
             setInterval(() => {
+                if (!timerStarted) return; // Wait until deadline is set
+                
                 const remaining = deadline - Date.now();
                 if (remaining <= 0) {
                     window.location.href = '/logout';
